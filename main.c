@@ -20,6 +20,7 @@ int insert(Dictionary *dict, char *cur_value, int ind);
 bool in_dictionary(Dictionary *dict, char *cur_value);
 void show (Dictionary *dict);
 Dictionary *LZW_Compressor(Dictionary *dict, char *text);
+void LZW_Decompressor(Dictionary *dict);
 void del (Dictionary *dict);
 
 int main()
@@ -31,9 +32,48 @@ int main()
     dict->msize = n;
     LZW_Compressor(dict, text);
     show(dict);
+    LZW_Decompressor(dict);
     free(text);
     del(dict);
     return 0;
+}
+
+void LZW_Decompressor(Dictionary *dict)
+{
+    if (dict->csize == 0)
+        return; //error
+    int current = 0, previous;
+    printf("%s", dict->rows[current].val);
+    current++;
+    while (current<dict->csize)
+    {
+        char *s = dict->rows[current].val;
+        for (int i = 1; s[i]!='\0'; i++)
+        {
+            printf("%c", s[i]);
+        }
+        current++;
+    }
+    /*while (current < dict->csize)
+    {
+        previous = current;
+        current++;
+        if (current < dict->csize)
+        {
+            char c = dict->rows[current].val[0];
+            printf("%s", dict->rows[current].val);
+            free(dict->rows[current].val);
+            char *new_str = calloc(strlen(dict->rows[previous].val)+2, sizeof(char));
+            strcpy(new_str, dict->rows[previous].val);
+            new_str[strlen(dict->rows[previous].val)] = c;
+            new_str[strlen(dict->rows[previous].val) + 1] = '\0';
+            dict->rows[current].val = new_str;
+        }
+        else
+        {
+            printf("%s", dict->rows[previous].val);
+        }
+    }*/
 }
 
 Dictionary *LZW_Compressor(Dictionary *dict, char *text)
@@ -75,8 +115,11 @@ void del(Dictionary *dict)
 {
 	for (int i=0; i<dict->csize; i++)
 	{
-		free(dict->rows[i].val);
-		dict->rows[i].val = NULL;
+        if (dict->rows[i].val != NULL)
+        {
+            free(dict->rows[i].val);
+            dict->rows[i].val = NULL;
+        }
 	}
 	free(dict->rows);
 	dict->rows = NULL;
